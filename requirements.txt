@@ -1,0 +1,7 @@
+# Gemini Automation Requirements
+
+# Playwright replaces Selenium — persistent browser contexts handle auth natively
+playwright==1.44.0
+
+# HTTP requests (optional future use)
+requests==2.31.0
