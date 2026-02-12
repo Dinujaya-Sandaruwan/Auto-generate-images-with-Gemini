@@ -119,3 +119,63 @@ class BrowserDriver:
 
             prefs = {
                 "download.default_directory": str(self.output_dir.absolute()),
+                "download.prompt_for_download": False,
+                "download.directory_upgrade": True,
+                "safebrowsing.enabled": True,
+            }
+            chrome_options.add_experimental_option("prefs", prefs)
+
+        try:
+            from webdriver_manager.chrome import ChromeDriverManager
+
+            service = Service(ChromeDriverManager().install())
+            self.driver = webdriver.Chrome(service=service, options=chrome_options)
+
+            if not self.remote_debug:
+                self.driver.maximize_window()
+
+            print("✓ Browser initialized successfully")
+            return self.driver
+        except Exception as e:
+            print(f"Error initializing browser: {e}")
+            raise
+
+    def get_driver(self):
+        if self.driver is None:
+            self.setup()
+        return self.driver
+
+    def navigate_to(self, url, wait_timeout=30):
+        """Navigate to a URL and wait for the page to load."""
+        print(f"Navigating to {url}...")
+        driver = self.get_driver()
+
+        # If the current tab was closed, open a new one
+        try:
+            _ = driver.current_window_handle
+        except Exception:
+            driver.execute_script("window.open('');")
+            driver.switch_to.window(driver.window_handles[-1])
+
+        try:
+            driver.get(url)
+        except Exception:
+            driver.execute_script("window.open('');")
+            driver.switch_to.window(driver.window_handles[-1])
+            driver.get(url)
+
+        try:
+            WebDriverWait(driver, wait_timeout).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
+            print(f"✓ Successfully navigated to {url}")
+        except TimeoutException:
+            print("⚠ Warning: Page load timeout, continuing anyway...")
+
+    def quit(self):
+        """Disconnect / close the browser."""
+        if self.driver:
+            # In remote_debug mode we only disconnect — never kill the user's Chrome
+            if not self.remote_debug:
+                self.driver.quit()
+            self.driver = None
