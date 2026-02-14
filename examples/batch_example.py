@@ -19,3 +19,24 @@ def create_example_json():
     
     json_path = Path("titles.json")
     with open(json_path, 'w', encoding='utf-8') as f:
+        json.dump(example_data, f, indent=2)
+    
+    print(f"✓ Created example {json_path}")
+    return json_path
+
+
+def main():
+    """Batch processing example."""
+    # Create example JSON if it doesn't exist
+    json_file = Path("titles.json")
+    if not json_file.exists():
+        create_example_json()
+    
+    # Initialize client
+    client = GeminiClient(
+        headless=False,
+        output_dir="generated_images"
+    )
+    
+    try:
+        # Process batch
