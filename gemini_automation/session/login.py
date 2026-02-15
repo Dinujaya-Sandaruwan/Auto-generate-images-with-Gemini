@@ -50,29 +50,3 @@ class LoginHandler:
             except NoSuchElementException:
                 continue
         
-        if login_required:
-            print("⚠ Login required. Please sign in manually in the browser.")
-            print(f"Waiting {wait_time} seconds for manual login...")
-            print("After logging in, your session will be saved for future use.")
-            
-            # Wait for user to log in
-            start_time = time.time()
-            
-            while time.time() - start_time < wait_time:
-                time.sleep(2)
-                if self.session_manager.is_logged_in():
-                    print("✓ Login detected!")
-                    # Save session after successful login
-                    self.session_manager.save()
-                    return True
-            
-            # Check one more time
-            if self.session_manager.is_logged_in():
-                print("✓ Login detected!")
-                self.session_manager.save()
-                return True
-            else:
-                print("⚠ Login timeout. Please try again or log in manually before running the script.")
-                return False
-        
-        return True
