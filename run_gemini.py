@@ -21,3 +21,26 @@ PROMPT = (
     "in the sky, bioluminescent flora surrounding them, cinematic lighting, "
     "ultra detailed, 8k"
 )
+TITLE = "alien_planet_astronaut"
+OUTPUT_DIR = "generated_images"
+# ---------------------------------------------------------------------------
+
+
+def cmd_login():
+    login()
+
+
+def cmd_logout():
+    logout()
+
+
+def cmd_generate():
+    if not session_exists():
+        print("No saved session found. Run login first:")
+        print("  python run_gemini.py login")
+        sys.exit(1)
+
+    print("=" * 60)
+    print("Generating image (headless)")
+    print("=" * 60)
+    print(f"Prompt: {PROMPT}\n")
