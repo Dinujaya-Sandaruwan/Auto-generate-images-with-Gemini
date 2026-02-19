@@ -19,3 +19,13 @@ def main():
             title="sunset_mountains"
         )
         
+        print(f"✓ Success! Image saved to: {image_path}")
+        
+    except Exception as e:
+        print(f"✗ Error: {e}")
+    finally:
+        client.close()
+
+
+if __name__ == "__main__":
+    main()
