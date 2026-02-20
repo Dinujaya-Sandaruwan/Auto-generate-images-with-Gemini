@@ -83,3 +83,45 @@ class SessionManager:
             print("✓ Session cleared")
             return True
         return False
+    
+    def is_logged_in(self):
+        """Check if user is already logged in."""
+        try:
+            # Look for indicators that user is logged in
+            # Check for sign-in buttons (if they exist, we're not logged in)
+            sign_in_indicators = [
+                "//button[contains(text(), 'Sign in')]",
+                "//a[contains(text(), 'Sign in')]",
+                "//button[contains(text(), 'Get started')]",
+            ]
+            
+            for selector in sign_in_indicators:
+                try:
+                    element = self.driver.find_element(By.XPATH, selector)
+                    if element.is_displayed():
+                        return False
+                except NoSuchElementException:
+                    continue
+            
+            # Check for logged-in indicators (input field, chat interface, etc.)
+            logged_in_indicators = [
+                (By.CSS_SELECTOR, "textarea[aria-label*='Enter a prompt']"),
+                (By.CSS_SELECTOR, "textarea[placeholder*='Enter a prompt']"),
+                (By.CSS_SELECTOR, "div[contenteditable='true']"),
+                (By.CSS_SELECTOR, "[role='textbox']"),
+            ]
+            
+            for by, selector in logged_in_indicators:
+                try:
+                    element = self.driver.find_element(by, selector)
+                    if element.is_displayed():
+                        print("✓ Already logged in")
+                        return True
+                except NoSuchElementException:
+                    continue
+            
+            # If we can't find clear indicators, assume not logged in
+            return False
+        except Exception as e:
+            print(f"⚠ Could not determine login status: {e}")
+            return False

@@ -54,3 +54,30 @@ def login():
         print("Sign in to Google in the browser window that just opened.")
         print("The window will close automatically once you are signed in.")
         print("=" * 60)
+
+        # Wait up to 3 minutes for the URL to become .../app
+        deadline = time.time() + 180
+        while time.time() < deadline:
+            if SIGNED_IN_URL in page.url:
+                # Give the page a moment to fully settle and write storage
+                time.sleep(3)
+                print("\nSign-in detected. Session saved.")
+                context.close()
+                return
+            time.sleep(1)
+
+        print("\nTimed out waiting for sign-in. Please run login again.")
+        context.close()
+
+
+def logout():
+    """Delete the saved session."""
+    if SESSION_DIR.exists():
+        shutil.rmtree(SESSION_DIR)
+        print("Session cleared. Run `python run_gemini.py login` to sign in again.")
+    else:
+        print("No saved session found.")
+
+
+def session_exists() -> bool:
+    return SESSION_DIR.exists() and any(SESSION_DIR.iterdir())

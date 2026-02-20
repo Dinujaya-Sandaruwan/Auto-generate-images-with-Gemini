@@ -10,3 +10,10 @@ def main():
         print(f"Generating image with prompt: '{prompt}'...")
         image_path = client.generate_image(prompt=prompt, title="cyberpunk_city_gui")
         print(f"Success! Image saved to: {os.path.abspath(image_path)}")
+    except Exception as e:
+        print(f"Error during GUI generation: {e}")
+    finally:
+        client.close()
+
+if __name__ == '__main__':
+    main()
