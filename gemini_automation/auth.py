@@ -52,29 +52,37 @@ def login():
 
         print("=" * 60)
         print("Sign in to Google in the browser window that just opened.")
-        print("The window will close automatically once you are signed in.")
+        print("Once signed in, close the browser window to continue.")
         print("=" * 60)
 
         # Wait up to 3 minutes for the URL to become .../app
         deadline = time.time() + 180
+        signed_in = False
         while time.time() < deadline:
             if SIGNED_IN_URL in page.url:
-                # Give the page a moment to fully settle and write storage
-                time.sleep(3)
-                print("\nSign-in detected. Session saved.")
-                print("=" * 60)
-                print("You can now close the browser window manually.")
-                print("=" * 60)
-                # Keep context open — let the user close the browser themselves
-                try:
-                    page.wait_for_event("close", timeout=0)
-                except Exception:
-                    pass
-                return
+                signed_in = True
+                break
             time.sleep(1)
 
-        print("\nTimed out waiting for sign-in. Please run login again.")
-        context.close()
+        if not signed_in:
+            print("\nTimed out waiting for sign-in. Please run login again.")
+            context.close()
+            return
+
+        # Give the page a moment to fully settle and write storage
+        time.sleep(3)
+        print("\nSign-in detected. Session saved.")
+        print("=" * 60)
+        print("Close the browser window to finish.")
+        print("=" * 60)
+
+        # Wait until the user manually closes the browser
+        while not page.is_closed():
+            try:
+                page.evaluate("1")  # lightweight ping to check if page is alive
+                time.sleep(1)
+            except Exception:
+                break  # page/browser was closed
 
 
 def logout():
