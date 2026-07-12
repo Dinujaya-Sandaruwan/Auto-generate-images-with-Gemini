@@ -74,15 +74,16 @@ def login():
         time.sleep(3)
         print("\nSign-in detected. Session saved.")
         print("=" * 60)
-        print("Close the browser window to finish.")
+        print("Press Ctrl+C to exit.")
         print("=" * 60)
 
-        # Use a threading.Event to detect browser close from the context's event handler
-        closed_event = threading.Event()
-        context.on("close", lambda: closed_event.set())
-
-        # Block until the user closes the browser
-        closed_event.wait()
+        # Keep the script alive until the user presses Ctrl+C
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            print("\nExiting.")
+            context.close()
 
 
 def logout():
