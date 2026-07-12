@@ -12,6 +12,7 @@ Phase 2 — session is reused automatically by image_generator.py.
 
 import shutil
 import time
+import threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
@@ -76,13 +77,12 @@ def login():
         print("Close the browser window to finish.")
         print("=" * 60)
 
-        # Wait until the user manually closes the browser
-        while not page.is_closed():
-            try:
-                page.evaluate("1")  # lightweight ping to check if page is alive
-                time.sleep(1)
-            except Exception:
-                break  # page/browser was closed
+        # Use a threading.Event to detect browser close from the context's event handler
+        closed_event = threading.Event()
+        context.on("close", lambda: closed_event.set())
+
+        # Block until the user closes the browser
+        closed_event.wait()
 
 
 def logout():
