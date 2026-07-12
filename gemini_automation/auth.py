@@ -27,70 +27,68 @@ def login():
     complete Google sign-in.  Detects success by watching for the URL to
     change to gemini.google.com/app (the main chat page).
     """
+    import sys
     SESSION_DIR.mkdir(parents=True, exist_ok=True)
 
-    with sync_playwright() as pw:
-        context = pw.chromium.launch_persistent_context(
-            user_data_dir=str(SESSION_DIR),
-            headless=False,
-            slow_mo=100,
-            args=[
-                "--disable-blink-features=AutomationControlled",
-                "--start-maximized",
-            ],
-            no_viewport=True,           # respect the maximized window size
-            ignore_https_errors=True,
-        )
+    try:
+        with sync_playwright() as pw:
+            context = pw.chromium.launch_persistent_context(
+                user_data_dir=str(SESSION_DIR),
+                headless=False,
+                slow_mo=100,
+                args=[
+                    "--disable-blink-features=AutomationControlled",
+                    "--start-maximized",
+                ],
+                no_viewport=True,
+                ignore_https_errors=True,
+            )
 
-        page = context.pages[0] if context.pages else context.new_page()
-        page.goto(GEMINI_URL, wait_until="domcontentloaded", timeout=30_000)
+            page = context.pages[0] if context.pages else context.new_page()
+            page.goto(GEMINI_URL, wait_until="domcontentloaded", timeout=30_000)
 
-        # Already signed in from a previous session?
-        if SIGNED_IN_URL in page.url:
-            print("Already signed in.")
-            context.close()
-            return
-
-        print("=" * 60)
-        print("Sign in to Google in the browser window that just opened.")
-        print("Once signed in, close the browser window to continue.")
-        print("=" * 60)
-
-        # Wait up to 3 minutes for the URL to become .../app
-        deadline = time.time() + 180
-        signed_in = False
-        while time.time() < deadline:
+            # Already signed in from a previous session?
             if SIGNED_IN_URL in page.url:
-                signed_in = True
-                break
-            time.sleep(1)
+                print("Already signed in.")
+                context.close()
+                return
 
-        if not signed_in:
-            print("\nTimed out waiting for sign-in. Please run login again.")
-            context.close()
-            return
+            print("=" * 60)
+            print("Sign in to Google in the browser window that just opened.")
+            print("Once signed in, press Ctrl+C to exit.")
+            print("=" * 60)
 
-        # Give the page a moment to fully settle and write storage
-        time.sleep(3)
-        print("\nSign-in detected. Session saved.")
-        print("=" * 60)
-        print("Press Ctrl+C to exit.")
-        print("=" * 60)
+            # Wait up to 3 minutes for the URL to become .../app
+            deadline = time.time() + 180
+            signed_in = False
+            while time.time() < deadline:
+                if SIGNED_IN_URL in page.url:
+                    signed_in = True
+                    break
+                time.sleep(1)
 
-        # Keep the script alive until the user presses Ctrl+C
-        try:
+            if not signed_in:
+                print("\nTimed out waiting for sign-in. Please run login again.")
+                context.close()
+                return
+
+            # Give the page a moment to fully settle and write storage
+            time.sleep(3)
+            print("\nSign-in detected. Session saved.")
+            print("=" * 60)
+            print("Press Ctrl+C to exit.")
+            print("=" * 60)
+
             while True:
                 time.sleep(1)
-        except KeyboardInterrupt:
-            pass
 
-        try:
-            context.close()
-        except Exception:
-            pass
+    except KeyboardInterrupt:
+        pass
+    except Exception:
+        pass
 
-        print("\nSession saved. Done.")
-        import sys; sys.exit(0)
+    print("\nSession saved. Done.")
+    sys.exit(0)
 
 
 def logout():
