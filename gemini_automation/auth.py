@@ -82,8 +82,15 @@ def login():
             while True:
                 time.sleep(1)
         except KeyboardInterrupt:
-            print("\nExiting.")
+            pass
+
+        try:
             context.close()
+        except Exception:
+            pass
+
+        print("\nSession saved. Done.")
+        import sys; sys.exit(0)
 
 
 def logout():
