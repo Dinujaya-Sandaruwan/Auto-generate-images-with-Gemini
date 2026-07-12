@@ -62,7 +62,14 @@ def login():
                 # Give the page a moment to fully settle and write storage
                 time.sleep(3)
                 print("\nSign-in detected. Session saved.")
-                context.close()
+                print("=" * 60)
+                print("You can now close the browser window manually.")
+                print("=" * 60)
+                # Keep context open — let the user close the browser themselves
+                try:
+                    page.wait_for_event("close", timeout=0)
+                except Exception:
+                    pass
                 return
             time.sleep(1)
 
